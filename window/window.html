@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        img {
+            width: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="listProductsBtn">
+        <button type="submit">列出所有商品</button>
+    </form>
+    <p> </p>
+    
+    <p> </p>
+    <form id="search-form">
+        <label for="search-input">輸入想搜尋的商品：</label>
+        <input type="text" id="search-input" name="search-input">
+        <button type="submit">搜尋</button>
+    </form>
+
+    <h2><img src="https://cdn1.iconfinder.com/data/icons/jumpicon-basic-ui-line-1/32/-_Filter-Filters-256.png" alt="篩選">
+        條件篩選</h2>
+
+    <form id="filter-form">
+        <label for="category-select">分類：</label>
+        <select id="category-select" name="category">
+            <option value="">全部</option>
+            <option value="3C">3C</option>
+            <option value="飲料">飲料</option>
+            <option value="食品">食品</option>
+            <!-- 其他商品分類選項 -->
+        </select>
+        <button type="submit">篩選</button>
+    </form>
+    <p> </p>
+    <form id="price-form">
+        <label for="min-price-input">最低價格：</label>
+        <input id="min-price-input" type="number" min="0" step="1" name="min-price">
+        <label for="max-price-input">最高價格：</label>
+        <input id="max-price-input" type="number" min="0" step="1" name="max-price">
+        <button type="submit">篩選</button>
+    </form>
+
+    <div id="search-results">
+        <table id="productTable"></table>
+    </div>
+
+    <script type="module">
+        import { product } from '../modules/product.js';
+
+
+
+        document.getElementById("listProductsBtn").addEventListener("submit", function (event) {
+            event.preventDefault();
+            listall();
+        });
+        // 當提交表單時執行搜尋函數
+        document.getElementById("search-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            search();
+        });
+
+        document.getElementById("filter-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            filter();
+        });
+
+        document.getElementById("price-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            price();
+        });
+
+        function listall() {
+            // 先清空表格內容
+            // const resultsDiv = document.getElementById("search-results");
+            // resultsDiv.innerHTML = "";
+            const productTable = document.getElementById('productTable');
+
+
+            productTable.innerHTML = "";
+
+            productTable.innerHTML = "<thead><tr><th>產品編號</th><th>產品名稱</th><th>數量</th><th>單價</th><th>類型</th></tr></thead><tbody></tbody>";
+
+            // 取得產品清單並動態加入表格
+            for (const item of product) {
+                const row = productTable.insertRow();
+                row.insertCell().textContent = item.ProductNumber;
+                row.insertCell().textContent = item.ProductName;
+                row.insertCell().textContent = item.Amount;
+                row.insertCell().textContent = item.Price;
+                row.insertCell().textContent = item.ProductType;
+            }
+
+        }
+        // 搜尋函數
+        function search() {
+            // 取得輸入欄中的搜尋關鍵字
+            const keyword = document.getElementById("search-input").value.toLowerCase();
+
+            // 將符合搜尋條件的項目加入到 results 陣列中
+            const results = [];
+            for (let i = 0; i < product.length; i++) {
+                const item = product[i];
+                if (item.ProductName.toLowerCase().indexOf(keyword) !== -1) {
+                    results.push(item);
+                }
+            }
+
+            // 顯示結果
+            const resultsDiv = document.getElementById("search-results");
+            resultsDiv.innerHTML = "";
+            if (results.length === 0) {
+                resultsDiv.innerHTML = "沒有符合搜尋條件的結果。";
+            } else {
+                for (let i = 0; i < results.length; i++) {
+                    const item = results[i];
+                    const itemDiv = document.createElement("div");
+                    itemDiv.innerHTML = "產品編號：" + item.ProductNumber + "，產品名稱：" + item.ProductName + "，數量：" + item.Amount + "，單價：" + item.Price + "，類型：" + item.ProductType;
+                    resultsDiv.appendChild(itemDiv);
+                }
+            }
+        }
+
+        function filter() {
+            // 讀取選擇的商品分類
+            const category = document.getElementById("category-select").value;
+
+            // 根據分類篩選商品列表
+            const filteredProducts = category
+                ? product.filter((product) => product.ProductType === category)
+                : product;
+
+            // 顯示篩選後的商品列表
+            const resultsDiv = document.getElementById("search-results");
+            resultsDiv.innerHTML = "";
+            filteredProducts.forEach((product) => {
+                const li = document.createElement("li");
+                li.textContent = "產品名稱：" + product.ProductName + "，數量：" + product.Amount + "，單價：" + product.Price;
+
+                resultsDiv.appendChild(li);
+            });
+        }
+
+        function price() {
+            // 找到篩選器表單元素和商品列表元素
+            
+            const productList = document.getElementById("search-results");
+
+            // 讀取輸入的最低價格和最高價格
+            const minPrice = parseFloat(document.getElementById("min-price-input").value);
+            const maxPrice = parseFloat(document.getElementById("max-price-input").value);
+
+            // 根據價格範圍篩選商品列表
+            const filteredProducts = product.filter((product) => {
+                return (minPrice ? product.Price >= minPrice : true) &&
+                    (maxPrice ? product.Price <= maxPrice : true);
+            });
+
+            // 顯示篩選後的商品列表
+            productList.innerHTML = "";
+            filteredProducts.forEach((product) => {
+                const li = document.createElement("li");
+                li.textContent = "產品名稱：" + product.ProductName + "，數量：" + product.Amount + "，單價：" + product.Price;
+                productList.appendChild(li);
+            });
+        }
+
+
+
+
+
+    </script>
+</body>
+
+</html>

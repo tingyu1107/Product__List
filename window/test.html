@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="filter-form">
+        <label for="min-price-input">最低價格：</label>
+        <input id="min-price-input" type="number" min="0" step="1" name="min-price">
+        <label for="max-price-input">最高價格：</label>
+        <input id="max-price-input" type="number" min="0" step="1" name="max-price">
+        <button type="submit">篩選</button>
+    </form>
+    <div id="product-list">
+
+    </div>
+    <script>
+        // 假設商品列表已經存在，並且保存在一個變量中
+        const products = [
+            { name: "iPhone 13", price: 1099 },
+            { name: "MacBook Pro", price: 2499 },
+            { name: "T-shirt", price: 19.99 },
+            { name: "Jeans", price: 49.99 },
+            { name: "Chocolate", price: 3.99 },
+            { name: "Snacks", price: 1.99 },
+            // 其他商品項目
+        ];
+
+        // 找到篩選器表單元素和商品列表元素
+        const filterForm = document.getElementById("filter-form");
+        const productList = document.getElementById("product-list");
+
+        // 定義表單提交事件處理程序
+        filterForm.addEventListener("submit", function (event){
+            // 防止表單的默認行為
+            event.preventDefault();
+
+            // 讀取輸入的最低價格和最高價格
+            const minPrice = parseFloat(document.getElementById("min-price-input").value);
+            const maxPrice = parseFloat(document.getElementById("max-price-input").value);
+
+            // 根據價格範圍篩選商品列表
+            const filteredProducts = products.filter((product) => {
+                return (minPrice ? product.price >= minPrice : true) &&
+                    (maxPrice ? product.price <= maxPrice : true);
+            });
+
+            // 顯示篩選後的商品列表
+            productList.innerHTML = "";
+            filteredProducts.forEach((product) => {
+                const li = document.createElement("li");
+                li.textContent = product.name;
+                productList.appendChild(li);
+            });
+        });
+
+    </script>
+</body>
+
+</html>
